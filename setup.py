@@ -27,6 +27,7 @@ setup(
         "console_scripts": [
             "viewer = napari_ros.viewer:main",
             "stream_viewer = napari_ros.stream_viewer:main",
+            "phase_volume_viewer = napari_ros.phase_volume_viewer:main",
         ],
         "napari.manifest": ["napari-ros = napari_ros:napari.yaml"],
     },
