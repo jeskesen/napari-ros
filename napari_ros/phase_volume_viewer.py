@@ -24,8 +24,7 @@ update_times = []
 class NapariStreamViewer(Node):
     def __init__(self):
         super().__init__("napari_stream_viewer")
-        #self.declare_parameter("streams", ["stream0", "stream1"])
-        self.declare_parameter("streams", [])
+        self.declare_parameter("streams", ["stream0", "stream1"])
 
         streams = self.get_parameter("streams").get_parameter_value().string_array_value
 
@@ -37,14 +36,14 @@ class NapariStreamViewer(Node):
                 qos_profile_sensor_data,
             )
 
-        self.create_subscription(Float32MultiArray, "volume", self.volume_callback, qos_profile_sensor_data)
+        self.create_subscription(Float32MultiArray, "phase_reconstruction", self.volume_callback, 10)
         
-        self.get_logger().debug(f"Configured {len(streams)} streams")
+        self.get_logger().info(f"Configured {len(streams)} streams")
 
         self._elapsed_times = []
 
     def stream_callback(self, msg: Image, stream_id: int):
-        self.get_logger().debug(f"Got a new frame on stream {stream_id}")
+        self.get_logger().info(f"Got a new frame on stream {stream_id}")
         im = np.ndarray(
             shape=(msg.height, msg.width),
             dtype=np.uint8,
@@ -54,9 +53,10 @@ class NapariStreamViewer(Node):
         ros_p.send((im, layer_key))
 
     def volume_callback(self, msg: Float32MultiArray):
-        self.get_logger().debug(f"Got a new volume")
+        self.get_logger().info("Got a new volume")
         volume = np.array(msg.data, dtype=np.float32)
-        volume = volume.reshape((msg.layout.dim[0].size, msg.layout.dim[1].size, msg.layout.dim[2].size))
+        volume = volume.reshape((msg.layout.dim[2].size, msg.layout.dim[1].size, msg.layout.dim[0].size))
+        volume = volume.transpose((2, 0, 1))
         layer_key = "Phase Volume"
         ros_p.send((volume, layer_key))
         
