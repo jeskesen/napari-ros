@@ -55,8 +55,7 @@ class NapariStreamViewer(Node):
     def volume_callback(self, msg: Float32MultiArray):
         self.get_logger().info("Got a new volume")
         volume = np.array(msg.data, dtype=np.float32)
-        volume = volume.reshape((msg.layout.dim[2].size, msg.layout.dim[1].size, msg.layout.dim[0].size))
-        volume = volume.transpose((2, 0, 1))
+        volume = volume.reshape((msg.layout.dim[0].size, msg.layout.dim[1].size, msg.layout.dim[2].size))
         layer_key = "Phase Volume"
         ros_p.send((volume, layer_key))
         
